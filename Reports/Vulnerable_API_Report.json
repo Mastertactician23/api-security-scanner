@@ -1,0 +1,38 @@
+{
+  "target": "http://vampi:5000",
+  "scan_start": "2026-07-16 06:35:13",
+  "scan_end": "2026-07-16 06:35:13",
+  "duration_seconds": 0.4,
+  "summary": {
+    "total_checks": 2,
+    "vulnerabilities": 1,
+    "critical": 0,
+    "high": 1,
+    "medium": 0,
+    "secure": 1,
+    "security_score": 50,
+    "risk_rating": "HIGH"
+  },
+  "findings": [
+    {
+      "owasp_id": "API1:2023",
+      "name": "Broken Object Level Authorization",
+      "severity": "Critical",
+      "status": "SECURE",
+      "detail": "Object-level authorization appears to be enforced.",
+      "evidence": "",
+      "remediation": "",
+      "timestamp": "2026-07-16T06:35:13.351488"
+    },
+    {
+      "owasp_id": "API4:2023",
+      "name": "Missing Rate Limiting",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "Sent 30 requests in 0.1s with no rate limiting response (no 429 status code returned).",
+      "evidence": "30x POST /api/login in 0.1s \u2192 status codes: set()",
+      "remediation": "Implement rate limiting (e.g. 5 requests/minute per IP). Return 429 Too Many Requests. Consider account lockout after 5 failed attempts.",
+      "timestamp": "2026-07-16T06:35:13.495474"
+    }
+  ]
+}
