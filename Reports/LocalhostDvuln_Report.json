@@ -1,0 +1,178 @@
+{
+  "target": "http://localhost:8080",
+  "scan_start": "2026-07-16 06:17:31",
+  "scan_end": "2026-07-16 06:17:35",
+  "duration_seconds": 3.4,
+  "summary": {
+    "total_checks": 16,
+    "vulnerabilities": 16,
+    "critical": 7,
+    "high": 8,
+    "medium": 1,
+    "secure": 0,
+    "security_score": 0,
+    "risk_rating": "CRITICAL"
+  },
+  "findings": [
+    {
+      "owasp_id": "API1:2023",
+      "name": "Broken Object Level Authorization (BOLA)",
+      "severity": "Critical",
+      "status": "VULNERABLE",
+      "detail": "Accessed another user's data (/api/users/2) without ownership verification.",
+      "evidence": "GET /api/users/2 \u2192 HTTP 200: {\n  \"credit_card\": \"4222222222222222\",\n  \"email\": \"alice@corp.com\",\n  \"id\": 2,\n  \"password_hash\": \"e3ab81b0f403feec09a22fd2de727f23\",\n  \"role\": \"user\",\n  \"ssn\": \"987-65-4321\",\n  \"username\": \"alice\"\n}\n",
+      "remediation": "Implement object-level authorization checks. Verify the requesting user owns the resource before returning data.",
+      "timestamp": "2026-07-16T06:17:31.862096"
+    },
+    {
+      "owasp_id": "API1:2023",
+      "name": "BOLA \u2014 Order Resource",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "Order data accessible without ownership verification.",
+      "evidence": "GET /api/orders/1 \u2192 HTTP 200: {\n  \"amount\": 999.99,\n  \"id\": 1,\n  \"item\": \"Laptop\",\n  \"user_id\": 1\n}\n",
+      "remediation": "Verify order ownership before returning order data.",
+      "timestamp": "2026-07-16T06:17:31.868952"
+    },
+    {
+      "owasp_id": "API2:2023",
+      "name": "Missing Authentication",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "Protected endpoint /api/profile returns data without any authentication.",
+      "evidence": "GET /api/profile (no token) \u2192 HTTP 200: {\n  \"database\": \"SQLite\",\n  \"debug_mode\": true,\n  \"message\": \"Profile endpoint\",\n  \"server\": \"Flask/3.0\",\n  \"users_count\": 3\n}\n",
+      "remediation": "Require valid JWT token for all non-public endpoints. Return 401 Unauthorized for missing tokens.",
+      "timestamp": "2026-07-16T06:17:31.874488"
+    },
+    {
+      "owasp_id": "API2:2023",
+      "name": "JWT None Algorithm Attack",
+      "severity": "Critical",
+      "status": "VULNERABLE",
+      "detail": "API accepts JWT tokens signed with 'none' algorithm, bypassing signature verification entirely.",
+      "evidence": "JWT alg:none token accepted \u2192 HTTP 200",
+      "remediation": "Explicitly reject 'none' algorithm in JWT validation. Use a strong secret and enforce HS256 or RS256.",
+      "timestamp": "2026-07-16T06:17:31.880001"
+    },
+    {
+      "owasp_id": "API3:2023",
+      "name": "Excessive Data Exposure / Mass Assignment",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "API response contains sensitive fields that should never be returned: password, password_hash, ssn, credit_card",
+      "evidence": "GET /api/users/1 \u2192 fields found: ['password', 'password_hash', 'ssn', 'credit_card']\nSample: {\n  \"credit_card\": \"4111111111111111\",\n  \"email\": \"admin@corp.com\",\n  \"id\": 1,\n  \"password_hash\": \"0192023a7bbd73250516f069df18b500\",\n  \"role\": \"admin\",\n  \"ssn\": \"123-45-6789\",\n  \"username\": \"admin\"\n}\n",
+      "remediation": "Filter API responses to return only necessary fields. Never return password hashes, SSNs, or card numbers.",
+      "timestamp": "2026-07-16T06:17:31.893580"
+    },
+    {
+      "owasp_id": "API4:2023",
+      "name": "Missing Rate Limiting",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "Sent 30 requests in 0.1s with no rate limiting response (no 429 status code returned).",
+      "evidence": "30x POST /api/login in 0.1s \u2192 status codes: set()",
+      "remediation": "Implement rate limiting (e.g. 5 requests/minute per IP). Return 429 Too Many Requests. Consider account lockout after 5 failed attempts.",
+      "timestamp": "2026-07-16T06:17:32.023311"
+    },
+    {
+      "owasp_id": "API5:2023",
+      "name": "Broken Function Level Authorization \u2014 /api/admin/users",
+      "severity": "Critical",
+      "status": "VULNERABLE",
+      "detail": "Admin endpoint /api/admin/users accessible without admin role verification.",
+      "evidence": "GET /api/admin/users \u2192 HTTP 200: {\n  \"admin_panel\": true,\n  \"users\": [\n    {\n      \"credit_card\": \"4111111111111111\",\n      \"email\": \"admin@corp.com\",\n      \"id\": 1,\n      \"role\": \"admin\",\n      \"ssn\": \"123-45-6789\",\n      \"username\"",
+      "remediation": "Implement role-based access control (RBAC). Verify user role == 'admin' before processing admin requests.",
+      "timestamp": "2026-07-16T06:17:32.029424"
+    },
+    {
+      "owasp_id": "API5:2023",
+      "name": "Broken Function Level Authorization \u2014 /api/admin/config",
+      "severity": "Critical",
+      "status": "VULNERABLE",
+      "detail": "Admin endpoint /api/admin/config accessible without admin role verification.",
+      "evidence": "GET /api/admin/config \u2192 HTTP 200: {\n  \"database_url\": \"sqlite:///prod.db\",\n  \"debug\": true,\n  \"internal_ip\": \"172.18.0.3\",\n  \"jwt_secret\": \"secret123\",\n  \"version\": \"1.0.0\"\n}\n",
+      "remediation": "Implement role-based access control (RBAC). Verify user role == 'admin' before processing admin requests.",
+      "timestamp": "2026-07-16T06:17:32.036286"
+    },
+    {
+      "owasp_id": "API6:2023",
+      "name": "Mass User Enumeration",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "Successfully enumerated 3 user records by iterating IDs (IDs accessed: [1, 2, 3]).",
+      "evidence": "GET /api/users/{1..5} \u2192 accessible IDs: [1, 2, 3]",
+      "remediation": "Implement rate limiting per user. Use non-sequential UUIDs instead of integer IDs. Add CAPTCHA for high-volume requests.",
+      "timestamp": "2026-07-16T06:17:32.076395"
+    },
+    {
+      "owasp_id": "API7:2023",
+      "name": "Server Side Request Forgery (SSRF)",
+      "severity": "Critical",
+      "status": "VULNERABLE",
+      "detail": "API fetched internal URL: http://localhost:8080/debug",
+      "evidence": "POST /api/fetch url=http://localhost:8080/debug \u2192 {\n  \"content\": \"{\\n  \\\"db_path\\\": \\\":memory:\\\",\\n  \\\"flask_version\\\": \\\"3.0\\\",\\n  \\\"jwt_secret\\\": \\\"secret123\\\",\\n  \\\"python_version\\\": \\\"3.11\\\",\\n  \\\"routes\\\": [\\n    \\\"/static/<path:filename>\\\",\\n    \\\"/api/login\\\",\\n    \\\"/api/users/<int:user_id>\\\",\\n    \\\"/api/profile\\\",\\n    \\\"/api/users\\\",\\n  ",
+      "remediation": "Validate and whitelist allowed URL schemes and hosts. Block requests to internal IP ranges (RFC 1918) and metadata endpoints.",
+      "timestamp": "2026-07-16T06:17:35.115910"
+    },
+    {
+      "owasp_id": "API8:2023",
+      "name": "Missing Security Headers",
+      "severity": "Medium",
+      "status": "VULNERABLE",
+      "detail": "Response missing 5 recommended security headers.",
+      "evidence": "Missing headers:\n  - X-Content-Type-Options (Prevents MIME-type sniffing attacks)\n  - X-Frame-Options (Prevents clickjacking attacks)\n  - Content-Security-Policy (Prevents XSS and injection attacks)\n  - Strict-Transport-Security (Enforces HTTPS connections)\n  - X-XSS-Protection (Legacy XSS protection for older browsers)",
+      "remediation": "Add all recommended security headers to every API response. Use a security headers middleware.",
+      "timestamp": "2026-07-16T06:17:35.119691"
+    },
+    {
+      "owasp_id": "API8:2023",
+      "name": "CORS Wildcard Misconfiguration",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "API returns Access-Control-Allow-Origin: * allowing any domain to make cross-origin requests.",
+      "evidence": "OPTIONS /api/users/1 Origin:evil.attacker.com \u2192 Access-Control-Allow-Origin: *",
+      "remediation": "Restrict CORS to specific trusted origins. Never use wildcard (*) for authenticated APIs.",
+      "timestamp": "2026-07-16T06:17:35.123960"
+    },
+    {
+      "owasp_id": "API9:2023",
+      "name": "Improper Inventory Management \u2014 Hidden Endpoints",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "Discovered 5 undocumented or legacy endpoints through probing.",
+      "evidence": "Discovered endpoints:\n  - /debug (HTTP 200)\n  - /swagger (HTTP 200)\n  - /v1/users/1 (HTTP 200)\n  - /health (HTTP 200)\n  - /api/admin/config (HTTP 200)",
+      "remediation": "Maintain an API inventory. Disable debug, legacy, and undocumented endpoints in production. Use API gateway to enforce endpoint allowlisting.",
+      "timestamp": "2026-07-16T06:17:35.203214"
+    },
+    {
+      "owasp_id": "API8:2023",
+      "name": "SQL Injection \u2014 Boolean-based SQLi",
+      "severity": "Critical",
+      "status": "VULNERABLE",
+      "detail": "SQL injection payload '' OR '1'='1' produced suspicious response.",
+      "evidence": "GET /api/search?q=' OR '1'='1 \u2192 HTTP 200: {\n  \"query\": \"' OR '1'='1\",\n  \"results\": [\n    {\n      \"email\": \"admin@corp.com\",\n      \"id\": 1,\n      \"username\": \"admin\"\n    },\n    {\n      \"email\": \"alice@corp.com\",\n      \"id\": 2,\n      \"username\": \"alice\"\n    },\n    {\n      \"email\": \"bob@corp.com\",\n      \"id\": 3,\n      \"username\": \"bob\"\n    }\n ",
+      "remediation": "Use parameterized queries / prepared statements. Never concatenate user input into SQL strings. Use an ORM.",
+      "timestamp": "2026-07-16T06:17:35.206942"
+    },
+    {
+      "owasp_id": "API8:2023",
+      "name": "Cross-Site Scripting (XSS) in API Response",
+      "severity": "High",
+      "status": "VULNERABLE",
+      "detail": "API reflects unsanitised input in response \u2014 XSS payload returned unencoded.",
+      "evidence": "POST /api/comment text='<script>alert('XSS')</script>' \u2192 {\n  \"comment\": \"<script>alert('XSS')</script>\",\n  \"rendered\": \"<p><script>alert('XSS')</script></p>\"\n}\n",
+      "remediation": "Sanitise all user input before returning in responses. Use Content-Security-Policy header. Encode output.",
+      "timestamp": "2026-07-16T06:17:35.213693"
+    },
+    {
+      "owasp_id": "API2:2023",
+      "name": "JWT Weak Secret",
+      "severity": "Critical",
+      "status": "VULNERABLE",
+      "detail": "JWT token signed with common/weak secret: 'secret123'",
+      "evidence": "Successfully decoded JWT with secret: 'secret123'",
+      "remediation": "Use a cryptographically random secret of at least 256 bits. Store it securely (env var or secrets manager). Rotate regularly.",
+      "timestamp": "2026-07-16T06:17:35.229415"
+    }
+  ]
+}
